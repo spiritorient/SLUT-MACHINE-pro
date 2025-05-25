@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const symbols = ["symbol1", "symbol2", "symbol3", "symbol4", "symbol5", "Medena"];
+    const symbols = ["symbol1", "symbol2", "symbol3", "symbol4", "traktordzija.gif", "Medena"];
     const reels = [
         document.getElementById("reel1"),
         document.getElementById("reel2"),
@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
         reel.textContent = "";
     };
 
-    reels.forEach(r => applyBackground(r, "siledzija.gif"));
+    reels.forEach(r => applyBackground(r, "traktordzija.gif"));
 
     const spinButton = document.getElementById("spin-button");
     const respinButton = document.getElementById("respin-button");
@@ -141,6 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
             updateScore(144);
             logEvent({ event: "jackpot", symbol: results[0], newScore: score });
             message.textContent = msg;
+            audioJackpot.play();
             endRound();
         }
         // Partial Win
@@ -202,6 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
             message.textContent = "🎉 Jackpot! +144 pts!";
             updateScore(144);
             logEvent({ event: "jackpot", symbol: results[0], newScore: score });
+            audioJackpot.play();
             return endRound();
         }
         if (respinCount === 3) {

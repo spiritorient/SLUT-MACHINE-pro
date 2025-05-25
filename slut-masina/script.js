@@ -5,6 +5,17 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("reel2"),
         document.getElementById("reel3"),
     ];
+
+    const applyBackground = (reel, symbol) => {
+        reel.style.backgroundImage = `url(images/${symbol}.png)`;
+        reel.style.backgroundSize = "contain";
+        reel.style.backgroundRepeat = "no-repeat";
+        reel.style.backgroundPosition = "center";
+        reel.textContent = "";
+    };
+
+    reels.forEach(r => applyBackground(r, "Dino"));
+
     const spinButton = document.getElementById("spin-button");
     const respinButton = document.getElementById("respin-button");
     const rechargeButton = document.getElementById("recharge-button");
@@ -61,14 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
             logEvent({ event: "recharge", newScore: score, rechargeCount });
         }
     });
-
-    const applyBackground = (reel, symbol) => {
-        reel.style.backgroundImage = `url(images/${symbol}.png)`;
-        reel.style.backgroundSize = "contain";
-        reel.style.backgroundRepeat = "no-repeat";
-        reel.style.backgroundPosition = "center";
-        reel.textContent = "";
-    };
 
     const animateReel = (reel, final, delay, frames) =>
         new Promise((res) => {

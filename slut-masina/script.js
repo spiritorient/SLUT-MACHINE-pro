@@ -7,14 +7,18 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     const applyBackground = (reel, symbol) => {
-        reel.style.backgroundImage = `url(images/${symbol}.png)`;
+        // if symbol includes “.xxx”, use it; otherwise add “.png”
+    const file = /\.\w+$/.test(symbol)
+    ? symbol
+    : `${symbol}.png`;
+        reel.style.backgroundImage = `url(images/${file})`;     
         reel.style.backgroundSize = "contain";
         reel.style.backgroundRepeat = "no-repeat";
         reel.style.backgroundPosition = "center";
         reel.textContent = "";
     };
 
-    reels.forEach(r => applyBackground(r, "Dino"));
+    reels.forEach(r => applyBackground(r, "siledzija.gif"));
 
     const spinButton = document.getElementById("spin-button");
     const respinButton = document.getElementById("respin-button");

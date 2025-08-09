@@ -65,9 +65,12 @@ document.addEventListener("DOMContentLoaded", () => {
         reel.textContent = "";
     };
 
-    // Start with blank reels (placeholder draws when symbols are applied)
+    // Initialize reels with placeholder art so the UI looks complete before uploads
     reels.forEach(r => {
-        r.style.backgroundImage = "";
+        r.style.backgroundImage = `url(${PLACEHOLDER})`;
+        r.style.backgroundSize = "contain";
+        r.style.backgroundRepeat = "no-repeat";
+        r.style.backgroundPosition = "center";
         r.textContent = "";
     });
 
@@ -381,7 +384,10 @@ document.addEventListener("DOMContentLoaded", () => {
         respinButton.style.display = "none";
         respinCount = 0;
         reels.forEach(r => {
-            r.style.backgroundImage = "";
+            r.style.backgroundImage = `url(${PLACEHOLDER})`;
+            r.style.backgroundSize = "contain";
+            r.style.backgroundRepeat = "no-repeat";
+            r.style.backgroundPosition = "center";
             r.textContent = "";
         });
     };
@@ -404,11 +410,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const fileInput = document.getElementById(`file-${id}`);
         const previewImg = document.getElementById(`preview-${id}`);
         if (!fileInput || !previewImg) return;
-        // Initialize preview from custom art
+        // Initialize preview from custom art or placeholder
         const custom = getCustomArtMap();
         const key = id;
         const url = custom[key];
-        if (url) previewImg.src = url; else previewImg.removeAttribute('src');
+        if (url) previewImg.src = url; else previewImg.src = DEFAULT_ART_MAP[key] || PLACEHOLDER;
         fileInput.addEventListener("change", () => {
             const file = fileInput.files && fileInput.files[0];
             if (!file) return;

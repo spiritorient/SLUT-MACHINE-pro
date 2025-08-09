@@ -98,15 +98,36 @@
     <div id="rules-modal" class="modal-overlay" aria-hidden="true" style="display:none;">
         <div class="modal">
             <h2>How to Play</h2>
-            <ul>
-                <li>Each spin costs 21 points.</li>
-                <li>Match 3 symbols to win a jackpot. Higher tiers pay more.</li>
-                <li>Match exactly 2 symbols to earn a small win and unlock a paid respin.</li>
-                <li>Every Trap deducts 5 points. Three Traps trigger the Wildcard bonus.</li>
-                <li>Wildcard acts as any symbol for matches and may trigger a special bonus.</li>
-                <li>Recharge appears automatically if your score drops below 50 (+300 points).</li>
-                <li>You can customize symbol art anytime from the Customize menu.</li>
-            </ul>
+            <div class="rules-grid">
+                <div class="rule-card">
+                    <h3>Spin</h3>
+                    <p>Each spin costs <strong>21 pts</strong>. Reels can land on <em>Bronze</em>, <em>Silver</em>, <em>Gold</em>, <em>Diamond</em>, <em>Trap</em>, or <em>Wildcard</em>.</p>
+                </div>
+                <div class="rule-card">
+                    <h3>Jackpot</h3>
+                    <p>3-of-a-kind (Wildcard substitutes): Bronze 60, Silver 100, Gold 160, Diamond 300.</p>
+                </div>
+                <div class="rule-card">
+                    <h3>Partial Win</h3>
+                    <p>2-of-a-kind (Wildcard substitutes): Bronze 15, Silver 20, Gold 25, Diamond 30. Unlocks <strong>Respin</strong> for 34 pts.</p>
+                </div>
+                <div class="rule-card">
+                    <h3>Trap</h3>
+                    <p>Each Trap deducts <strong>5 pts</strong>. Three Traps trigger the <strong>Wildcard Bonus</strong>.</p>
+                </div>
+                <div class="rule-card">
+                    <h3>Wildcard</h3>
+                    <p>Acts as any symbol for matches. In the bonus, reels expand left-to-right; complete all three for <strong>+1000 pts</strong>.</p>
+                </div>
+                <div class="rule-card">
+                    <h3>Recharge</h3>
+                    <p>Appears if score drops below 50. Adds <strong>+300 pts</strong>.</p>
+                </div>
+                <div class="rule-card">
+                    <h3>Customize</h3>
+                    <p>Upload your own art anytime. Placeholders are used until you customize.</p>
+                </div>
+            </div>
             <div class="modal-actions">
                 <button id="close-rules" class="primary">Close</button>
             </div>

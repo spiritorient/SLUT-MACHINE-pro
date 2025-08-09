@@ -460,6 +460,12 @@ document.addEventListener("DOMContentLoaded", () => {
             customizeModal.setAttribute("aria-hidden", "true");
         }
     });
+    document.getElementById("close-customize-x")?.addEventListener("click", () => {
+        if (customizeModal) {
+            customizeModal.style.display = "none";
+            customizeModal.setAttribute("aria-hidden", "true");
+        }
+    });
 
     // Rules modal
     const rulesModal = document.getElementById("rules-modal");
@@ -470,6 +476,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     document.getElementById("close-rules")?.addEventListener("click", () => {
+        if (rulesModal) {
+            rulesModal.style.display = "none";
+            rulesModal.setAttribute("aria-hidden", "true");
+        }
+    });
+    document.getElementById("close-rules-x")?.addEventListener("click", () => {
         if (rulesModal) {
             rulesModal.style.display = "none";
             rulesModal.setAttribute("aria-hidden", "true");

@@ -2,7 +2,7 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    background-color: #f4f4f4;
+    background: linear-gradient(135deg, #f0f9ff 0%, #fef3c7 100%);
     margin: 0;
     padding: 0;
 }
@@ -93,11 +93,12 @@ body {
 }
 
 /* Slot Machine Container */
+/* Card shell */
 #slot-machine {
     margin: 40px auto;
     padding: 16px 16px 24px;
     border: 1px solid #e5e7eb;
-    background-color: #ffffff;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
     width: min(520px, 94vw);
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -146,7 +147,7 @@ body {
 .reel {
     width: 120px;
     height: 120px;
-    background-color: #f1f5f9;
+    background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
     border: 1px solid #cbd5e1;
     border-radius: 12px;
     display: flex;
@@ -165,19 +166,20 @@ body {
     padding: 10px 20px;
     font-size: 16px;
     border: none;
-    background-color: #28a745;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
     color: white;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: transform .06s ease, box-shadow .2s ease;
 }
 
 #spin-button:hover {
-    background-color: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px rgba(34,197,94,0.2);
 }
 
 #spin-button:disabled {
-    background-color: #cccccc;
+    background: #cccccc;
     cursor: not-allowed;
 }
 
@@ -240,7 +242,7 @@ body {
 #respin-button {
     font-size: 16px;
     color: #ffffff;
-    background-color: #ff4500;
+    background: linear-gradient(90deg, #fb923c, #f97316);
     /* Highlight with an attention-grabbing color */
     border: none;
     border-radius: 5px;
@@ -250,15 +252,15 @@ body {
 }
 
 #respin-button:hover {
-    background-color: #ff6347;
     /* Slightly lighter on hover */
     filter: saturate(1.1);
+    box-shadow: 0 8px 16px rgba(249,115,22,0.2);
 }
 
 #recharge-button {
     font-size: 16px;
     color: #ffffff;
-    background-color: #28a745;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
     /* Green color for recharge */
     border: none;
     border-radius: 5px;
@@ -269,7 +271,6 @@ body {
 }
 
 #recharge-button:hover {
-    background-color: #218838;
     /* Darker green on hover */
     box-shadow: 0 8px 16px rgba(34,197,94,0.2);
 }
@@ -312,8 +313,8 @@ body {
 
 .rule-card {
     border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    background: #f9fafb;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff, #f9fafb);
     padding: 12px;
 }
 

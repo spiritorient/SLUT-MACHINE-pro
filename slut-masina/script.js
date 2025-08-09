@@ -310,14 +310,14 @@ document.addEventListener("DOMContentLoaded", () => {
         message.textContent += " Continue!";
     };
 
-    // Audio setup
-    const audioDinoStart = new Audio("audio/dino_start.mp3");
-    const audioDinoReel1 = new Audio("audio/dino_reel1.mp3");
-    const audioDinoReel2 = new Audio("audio/dino_reel2.mp3");
-    const audioDinoReel3 = new Audio("audio/dino_reel3.mp3");
-    const audioDinoFail1 = new Audio("audio/dino_fail1.mp3");
-    const audioDinoFail2 = new Audio("audio/dino_fail2.mp3");
-    const audioJackpot = new Audio("audio/jackpot_sound.mp3");
+    // Audio setup via preloaded <audio> elements
+    const audioDinoStart = document.getElementById("audio-dino-start");
+    const audioDinoReel1 = document.getElementById("audio-dino-reel1");
+    const audioDinoReel2 = document.getElementById("audio-dino-reel2");
+    const audioDinoReel3 = document.getElementById("audio-dino-reel3");
+    const audioDinoFail1 = document.getElementById("audio-dino-fail1");
+    const audioDinoFail2 = document.getElementById("audio-dino-fail2");
+    const audioJackpot = document.getElementById("audio-jackpot_sound");
 
     const triggerSuperWildcard = async (guaranteed) => {
         if (!guaranteed && Math.random() > 1/3) {

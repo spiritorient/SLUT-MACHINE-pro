@@ -3,11 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slut·Machine</title>
+    <title>Slot Machine</title>
     <link rel="icon" href="favicon.png" type="image/png" sizes="1000x1000">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Customize Modal (can be opened anytime) -->
+    <div id="customize-modal" class="modal-overlay" aria-hidden="true" style="display:none;">
+        <div class="modal">
+            <h2>Customize Your Symbols</h2>
+            <p>Upload images for any symbol below. Your choices are saved locally and can be changed anytime.</p>
+
+            <div class="asset-grid">
+                <div class="asset-item">
+                    <label for="file-value_bronze">Bronze (Low Value)</label>
+                    <input type="file" id="file-value_bronze" accept="image/*">
+                    <img id="preview-value_bronze" alt="preview" />
+                </div>
+                <div class="asset-item">
+                    <label for="file-value_silver">Silver (Mid Value)</label>
+                    <input type="file" id="file-value_silver" accept="image/*">
+                    <img id="preview-value_silver" alt="preview" />
+                </div>
+                <div class="asset-item">
+                    <label for="file-value_gold">Gold (High Value)</label>
+                    <input type="file" id="file-value_gold" accept="image/*">
+                    <img id="preview-value_gold" alt="preview" />
+                </div>
+                <div class="asset-item">
+                    <label for="file-value_diamond">Diamond (Top Value)</label>
+                    <input type="file" id="file-value_diamond" accept="image/*">
+                    <img id="preview-value_diamond" alt="preview" />
+                </div>
+                <div class="asset-item">
+                    <label for="file-trap">Trap (Penalty)</label>
+                    <input type="file" id="file-trap" accept="image/*">
+                    <img id="preview-trap" alt="preview" />
+                </div>
+                <div class="asset-item">
+                    <label for="file-wildcard">Wildcard (Bonus)</label>
+                    <input type="file" id="file-wildcard" accept="image/*">
+                    <img id="preview-wildcard" alt="preview" />
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <span id="upload-status" style="margin-right:auto;color:#666">Customize your art</span>
+                <button id="close-customize" class="primary">Close</button>
+                <button id="reset-custom-art" class="linkish">Reset</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Place these inside the <body> or appropriate section -->
     <audio id="audio-dino-start" src="audio/dino_start.mp3" preload="auto"></audio>
     <audio id="audio-dino-reel1" src="audio/dino_reel1.mp3" preload="auto"></audio>
@@ -18,17 +65,19 @@
     <audio id="audio-jackpot_sound" src="audio/jackpot_sound.mp3" preload="auto"></audio>
 
     <div id="slot-machine">
-        <h1>Slut·Machine</h1>
-        <h6><a href="https://github.com/spiritorient/SLUT-MACHINE-pro" target="_blank">openSource·GitHub</a></h6>
-        <h6><a href="https://t.me/devkozmos">·contact·</a></h6>
-        <h6><a href="https://www.youtube.com/@oldbrickfactory/live" target="_blank">dev•Live</a></h6>
-        <h6>|No Official X OR Telegram Group/Channel|</h6>
+        <div class="topbar">
+            <h1>Slot Machine</h1>
+            <div class="topbar-actions">
+                <button id="open-customize" class="secondary">Customize Art</button>
+                <button id="open-rules" class="secondary">Game Rules</button>
+            </div>
+        </div>
 
         <!-- Reel Container -->
         <div class="reels">
             <div class="reel" id="reel1"></div>
-            <div class="reel" id="reel2">°</div>
-            <div class="reel" id="reel3">°</div>
+            <div class="reel" id="reel2"></div>
+            <div class="reel" id="reel3"></div>
         </div>
 
        <!-- Buttons Section -->
@@ -43,6 +92,25 @@
         <div id="turn-score" style="opacity: 0; transition: opacity 0.5s ease-out; font-size: 18px; text-align: center;"></div>
         <div id="score">Score: 0</div>
         <div id="recharge-counter">Recharges: 0</div>
+    </div>
+
+    <!-- Rules Modal -->
+    <div id="rules-modal" class="modal-overlay" aria-hidden="true" style="display:none;">
+        <div class="modal">
+            <h2>How to Play</h2>
+            <ul>
+                <li>Each spin costs 21 points.</li>
+                <li>Match 3 symbols to win a jackpot. Higher tiers pay more.</li>
+                <li>Match exactly 2 symbols to earn a small win and unlock a paid respin.</li>
+                <li>Every Trap deducts 5 points. Three Traps trigger the Wildcard bonus.</li>
+                <li>Wildcard acts as any symbol for matches and may trigger a special bonus.</li>
+                <li>Recharge appears automatically if your score drops below 50 (+300 points).</li>
+                <li>You can customize symbol art anytime from the Customize menu.</li>
+            </ul>
+            <div class="modal-actions">
+                <button id="close-rules" class="primary">Close</button>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>

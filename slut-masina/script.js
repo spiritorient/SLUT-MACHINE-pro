@@ -1,5 +1,55 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const symbols = ["symbol1", "symbol2", "symbol3", "symbol4", "traktordzija.gif", "Medena"];
+    // New symbol set with roles
+    const SYMBOLS = [
+        "value_bronze",
+        "value_silver",
+        "value_gold",
+        "value_diamond",
+        "trap",
+        "wildcard",
+    ];
+
+    // Allow custom art via localStorage (data URLs). Use generic SVG placeholder by default.
+    const CUSTOM_ART_KEY = "slot_machine_custom_art_v2";
+    const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%25' height='100%25' fill='%23e9eef3'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23667' font-family='Arial' font-size='18'>Upload Art</text></svg>";
+    const DEFAULT_ART_MAP = {
+        value_bronze: PLACEHOLDER,
+        value_silver: PLACEHOLDER,
+        value_gold: PLACEHOLDER,
+        value_diamond: PLACEHOLDER,
+        trap: PLACEHOLDER,
+        wildcard: PLACEHOLDER,
+    };
+
+    function getCustomArtMap() {
+        try {
+            const raw = localStorage.getItem(CUSTOM_ART_KEY);
+            return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+            console.warn("Failed to read custom art map:", e);
+            return {};
+        }
+    }
+
+    function setCustomArtMap(map) {
+        try {
+            localStorage.setItem(CUSTOM_ART_KEY, JSON.stringify(map));
+        } catch (e) {
+            console.warn("Failed to save custom art map:", e);
+        }
+    }
+
+    function clearCustomArt() {
+        localStorage.removeItem(CUSTOM_ART_KEY);
+    }
+
+    // Resolve a symbol name to a URL (custom data URL or placeholder)
+    function resolveSymbolUrl(symbolName) {
+        const custom = getCustomArtMap();
+        if (custom[symbolName]) return custom[symbolName];
+        if (DEFAULT_ART_MAP[symbolName]) return DEFAULT_ART_MAP[symbolName];
+        return PLACEHOLDER;
+    }
     const reels = [
         document.getElementById("reel1"),
         document.getElementById("reel2"),
@@ -7,18 +57,19 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     const applyBackground = (reel, symbol) => {
-        // if symbol includes “.xxx”, use it; otherwise add “.png”
-    const file = /\.\w+$/.test(symbol)
-    ? symbol
-    : `${symbol}.png`;
-        reel.style.backgroundImage = `url(images/${file})`;     
+        const url = resolveSymbolUrl(symbol);
+        reel.style.backgroundImage = `url(${url})`;
         reel.style.backgroundSize = "contain";
         reel.style.backgroundRepeat = "no-repeat";
         reel.style.backgroundPosition = "center";
         reel.textContent = "";
     };
 
-    reels.forEach(r => applyBackground(r, "traktordzija.gif"));
+    // Start with blank reels (placeholder draws when symbols are applied)
+    reels.forEach(r => {
+        r.style.backgroundImage = "";
+        r.textContent = "";
+    });
 
     const spinButton = document.getElementById("spin-button");
     const respinButton = document.getElementById("respin-button");
@@ -34,6 +85,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const spinPrice = 21;
     const respinPrice = 34;
     const rechargePoints = 300;
+
+    // Weighted symbol distribution to balance gameplay
+    const symbolWeights = {
+        value_bronze: 5,
+        value_silver: 4,
+        value_gold: 3,
+        value_diamond: 2,
+        trap: 3,
+        wildcard: 1,
+    };
+    const weightedBag = Object.entries(symbolWeights).flatMap(([sym, w]) => Array(w).fill(sym));
+    function rollSymbol() {
+        return weightedBag[Math.floor(Math.random() * weightedBag.length)];
+    }
 
     // Send game-event payloads to the server
     function logEvent(payload) {
@@ -80,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const animateReel = (reel, final, delay, frames) =>
         new Promise((res) => {
             setTimeout(() => {
-                const animSyms = [...symbols, ...symbols];
+                const animSyms = [...weightedBag];
                 let idx = 0;
                 const dur = 100;
                 const iv = setInterval(() => {
@@ -106,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
         spinButton.disabled = true;
         const results = [];
         const anims = reels.map((r, i) => {
-            const sym = symbols[Math.floor(Math.random() * symbols.length)];
+            const sym = rollSymbol();
             results.push(sym);
             return animateReel(r, sym, 0, 5 + i * 5);
         });
@@ -117,47 +182,73 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const checkWin = (results) => {
-        let medenaCount = results.filter((s) => s === "Medena").length;
+        const valueSymbols = ["value_bronze", "value_silver", "value_gold", "value_diamond"];
+        const payoutJackpot = {
+            value_bronze: 60,
+            value_silver: 100,
+            value_gold: 160,
+            value_diamond: 300,
+        };
+        const partialPayout = {
+            value_bronze: 15,
+            value_silver: 20,
+            value_gold: 25,
+            value_diamond: 30,
+        };
+        const trapPenalty = 5;
+
+        const trapCount = results.filter((s) => s === "trap").length;
+        const wildcardCount = results.filter((s) => s === "wildcard").length;
         let msg = "";
 
-        if (medenaCount) {
-            const ded = medenaCount * 3;
+        if (trapCount) {
+            const ded = trapCount * trapPenalty;
             updateScore(-ded);
-            msg += `😈 Medena x${medenaCount}, –${ded} pts. `;
-            logEvent({ event: "medena_penalty", count: medenaCount, newScore: score });
+            msg += `⚠️ Trap x${trapCount}, –${ded} pts. `;
+            logEvent({ event: "trap", count: trapCount, newScore: score });
         }
 
-        if (medenaCount === 3) {
-            msg += "Triggering Super-Wildcard Dino! ";
+        if (trapCount === 3) {
+            msg += "Triggering Wildcard Bonus! ";
             message.textContent = msg;
-            logEvent({ event: "dino_trigger", type: "triple_medena", score });
+            logEvent({ event: "wildcard_trigger", type: "triple_trap", score });
             triggerSuperWildcard(true);
             return;
         }
 
-        // Jackpot
-        if (results.every((s) => s === results[0])) {
-            msg += "🎉 Jackpot! +144 pts!";
-            updateScore(144);
-            logEvent({ event: "jackpot", symbol: results[0], newScore: score });
+        // Count value symbols
+        const counts = Object.fromEntries(valueSymbols.map(v => [v, 0]));
+        results.forEach((s) => {
+            if (counts.hasOwnProperty(s)) counts[s]++;
+        });
+
+        // Determine best match using wildcards to complete sets
+        let bestSymbol = null;
+        let bestCount = 0;
+        valueSymbols.forEach((v) => {
+            const total = counts[v] + wildcardCount;
+            if (total > bestCount) {
+                bestCount = total;
+                bestSymbol = v;
+            }
+        });
+
+        if (bestCount >= 3) {
+            const payout = payoutJackpot[bestSymbol];
+            msg += `🎉 Jackpot! +${payout} pts!`;
+            updateScore(payout);
+            logEvent({ event: "jackpot", symbol: bestSymbol, wildcards: wildcardCount, newScore: score });
             message.textContent = msg;
             audioJackpot.play();
             endRound();
-        }
-        // Partial Win
-        else if (
-            results[0] === results[1] ||
-            results[1] === results[2] ||
-            results[0] === results[2]
-        ) {
-            msg += "😊 Partial Win! +13 pts!";
-            updateScore(13);
-            logEvent({ event: "partial_win", results, newScore: score });
+        } else if (bestCount === 2) {
+            const payout = partialPayout[bestSymbol];
+            msg += `😊 Partial Win! +${payout} pts!`;
+            updateScore(payout);
+            logEvent({ event: "partial_win", symbol: bestSymbol, wildcards: wildcardCount, newScore: score });
             message.textContent = msg;
             enableRespin(results);
-        }
-        // No win
-        else {
+        } else {
             msg += "😞 Try Again!";
             message.textContent = msg;
             logEvent({ event: "no_match", results, newScore: score });
@@ -182,11 +273,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         updateScore(-respinPrice);
         respinCount++;
-        const idx =
-            results[0] === results[1] ? 2 :
-            results[1] === results[2] ? 0 :
-            1;
-        const final = symbols[Math.floor(Math.random() * symbols.length)];
+        // Choose the reel that is not part of the best potential match
+        const valueSymbols = ["value_bronze", "value_silver", "value_gold", "value_diamond"];
+        const wildcardCount = results.filter((s) => s === "wildcard").length;
+        const counts = Object.fromEntries(valueSymbols.map(v => [v, 0]));
+        results.forEach((s) => { if (counts.hasOwnProperty(s)) counts[s]++; });
+        let bestSymbol = valueSymbols[0];
+        let bestCount = 0;
+        valueSymbols.forEach((v) => { const total = counts[v] + wildcardCount; if (total > bestCount) { bestCount = total; bestSymbol = v; } });
+        let idx = results.findIndex((s) => s !== bestSymbol && s !== "wildcard");
+        if (idx === -1) idx = 2;
+        const final = rollSymbol();
         results[idx] = final;
         await animateReel(reels[idx], final, 0, 15);
 
@@ -194,21 +291,16 @@ document.addEventListener("DOMContentLoaded", () => {
         logEvent({ event: "respin", idx, symbol: final, newScore: score });
 
         // Check again for penalties or wins
-        if (results.every((s) => s === "Medena")) {
-            message.textContent = "Triggering Super-Wildcard Dino!";
-            logEvent({ event: "dino_trigger", type: "after_respin", score });
+        if (results.every((s) => s === "trap")) {
+            message.textContent = "Triggering Wildcard Bonus!";
+            logEvent({ event: "wildcard_trigger", type: "after_respin", score });
             return triggerSuperWildcard(true);
         }
-        if (results.every((s) => s === results[0])) {
-            message.textContent = "🎉 Jackpot! +144 pts!";
-            updateScore(144);
-            logEvent({ event: "jackpot", symbol: results[0], newScore: score });
-            audioJackpot.play();
-            return endRound();
-        }
+        // Re-evaluate full win after respin
+        checkWin(results);
         if (respinCount === 3) {
-            message.textContent = "❌ No respins left – Dino time!";
-            logEvent({ event: "dino_trigger", type: "respin_exhausted", score });
+            message.textContent = "❌ No respins left – Wildcard time!";
+            logEvent({ event: "wildcard_trigger", type: "respin_exhausted", score });
             return triggerSuperWildcard();
         }
 
@@ -226,9 +318,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const triggerSuperWildcard = async (guaranteed) => {
         if (!guaranteed && Math.random() > 1/3) {
-            message.textContent = "😞 No Dino this time!";
+            message.textContent = "😞 No Wildcard this time!";
             audioDinoFail1.play();
-            logEvent({ event: "dino_fail", reel: currentReel });
+            logEvent({ event: "wildcard_fail", reel: currentReel });
             return endRound();
         }
         currentReel = 0;
@@ -236,24 +328,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const expand = async () => {
             // play reel sound
             [audioDinoReel1, audioDinoReel2, audioDinoReel3][currentReel].play();
-            await animateReelWithCustomFrameDuration(reels[currentReel], "Dino", 0, 50, 80);
+            await animateReelWithCustomFrameDuration(reels[currentReel], "wildcard", 0, 50, 80);
             if (currentReel === 2) {
-                message.textContent = "🎉 Super-Wildcard! +1000 pts!";
+                message.textContent = "🎉 Wildcard Bonus! +1000 pts!";
                 updateScore(1000);
-                logEvent({ event: "dino_win", newScore: score });
+                logEvent({ event: "wildcard_win", newScore: score });
                 return endRound();
             }
             const success = guaranteed && currentReel === 0
                 ? true
                 : Math.random() <= 1/3;
             if (success) {
-                logEvent({ event: "dino_expand", reel: currentReel });
+                logEvent({ event: "wildcard_expand", reel: currentReel });
                 currentReel++;
                 setTimeout(expand, 500);
             } else {
                 [audioDinoFail1, audioDinoFail2][currentReel].play();
-                message.textContent = "😞 Dino failed to cum.";
-                logEvent({ event: "dino_fail", reel: currentReel });
+                message.textContent = "😞 Bonus failed to complete.";
+                logEvent({ event: "wildcard_fail", reel: currentReel });
                 return endRound();
             }
         };
@@ -263,7 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const animateReelWithCustomFrameDuration = (reel, final, delay, frames, frameDuration) =>
         new Promise((res) => {
             setTimeout(() => {
-                const animSyms = [...symbols, ...symbols];
+                const animSyms = [...weightedBag];
                 let idx = 0;
                 const iv = setInterval(() => {
                     if (idx >= frames) {
@@ -295,5 +387,89 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     spinButton.addEventListener("click", spinReels);
+
+    // Modal wiring: preview and persist custom art (can be opened any time)
+    const customizeModal = document.getElementById("customize-modal");
+    const uploadStatus = document.getElementById("upload-status");
+    const inputIds = [
+        "value_bronze",
+        "value_silver",
+        "value_gold",
+        "value_diamond",
+        "trap",
+        "wildcard",
+    ];
+
+    function wireInput(id) {
+        const fileInput = document.getElementById(`file-${id}`);
+        const previewImg = document.getElementById(`preview-${id}`);
+        if (!fileInput || !previewImg) return;
+        // Initialize preview from custom art
+        const custom = getCustomArtMap();
+        const key = id;
+        const url = custom[key];
+        if (url) previewImg.src = url; else previewImg.removeAttribute('src');
+        fileInput.addEventListener("change", () => {
+            const file = fileInput.files && fileInput.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                const map = getCustomArtMap();
+                map[key] = reader.result;
+                setCustomArtMap(map);
+                previewImg.src = reader.result;
+                updateUploadProgress();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    inputIds.forEach(wireInput);
+    function updateUploadProgress() {
+        const map = getCustomArtMap();
+        const count = inputIds.filter(id => !!map[id]).length;
+        if (uploadStatus) uploadStatus.textContent = `${count} customized`;
+    }
+    updateUploadProgress();
+
+    document.getElementById("reset-custom-art")?.addEventListener("click", () => {
+        clearCustomArt();
+        inputIds.forEach((id) => {
+            const preview = document.getElementById(`preview-${id}`);
+            if (preview) preview.removeAttribute('src');
+        });
+        updateUploadProgress();
+    });
+
+    // Open/close customize modal
+    document.getElementById("open-customize")?.addEventListener("click", () => {
+        if (customizeModal) {
+            customizeModal.style.display = "flex";
+            customizeModal.setAttribute("aria-hidden", "false");
+        }
+    });
+    document.getElementById("close-customize")?.addEventListener("click", () => {
+        if (customizeModal) {
+            customizeModal.style.display = "none";
+            customizeModal.setAttribute("aria-hidden", "true");
+        }
+    });
+
+    // Rules modal
+    const rulesModal = document.getElementById("rules-modal");
+    document.getElementById("open-rules")?.addEventListener("click", () => {
+        if (rulesModal) {
+            rulesModal.style.display = "flex";
+            rulesModal.setAttribute("aria-hidden", "false");
+        }
+    });
+    document.getElementById("close-rules")?.addEventListener("click", () => {
+        if (rulesModal) {
+            rulesModal.style.display = "none";
+            rulesModal.setAttribute("aria-hidden", "true");
+        }
+    });
+
+    // Start game immediately
     startGame();
 });

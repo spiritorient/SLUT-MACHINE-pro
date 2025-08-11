@@ -3,11 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slut·Machine</title>
+    <title>Slot Machine</title>
     <link rel="icon" href="favicon.png" type="image/png" sizes="1000x1000">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Customize Modal (can be opened anytime) -->
+    <div id="customize-modal" class="modal-overlay" aria-hidden="true" style="display:none;">
+        <div class="modal">
+            <button class="modal-close" id="close-customize-x" aria-label="Close">×</button>
+            <h2>Customize Your Symbols</h2>
+            <p>Upload images for any symbol below. Your choices are saved locally and can be changed anytime.</p>
+
+            <div class="asset-grid">
+                <div class="asset-item">
+                    <label for="file-symbol1">Value 1</label>
+                    <input type="file" id="file-symbol1" accept="image/*">
+                    <img id="preview-symbol1" alt="preview" />
+                </div>
+                <div class="asset-item">
+                    <label for="file-symbol2">Value 2</label>
+                    <input type="file" id="file-symbol2" accept="image/*">
+                    <img id="preview-symbol2" alt="preview" />
+                </div>
+                <div class="asset-item">
+                    <label for="file-symbol3">Value 3</label>
+                    <input type="file" id="file-symbol3" accept="image/*">
+                    <img id="preview-symbol3" alt="preview" />
+                </div>
+                <div class="asset-item">
+                    <label for="file-symbol4">Value 4</label>
+                    <input type="file" id="file-symbol4" accept="image/*">
+                    <img id="preview-symbol4" alt="preview" />
+                </div>
+                <div class="asset-item">
+                    <label for="file-symbol5">Value 5</label>
+                    <input type="file" id="file-symbol5" accept="image/*">
+                    <img id="preview-symbol5" alt="preview" />
+                </div>
+                <div class="asset-item">
+                    <label for="file-HoneySlut">Honey Slut (Penalty)</label>
+                    <input type="file" id="file-HoneySlut" accept="image/*">
+                    <img id="preview-HoneySlut" alt="preview" />
+                </div>
+                <div class="asset-item">
+                    <label for="file-SuperWildcardSlut">Super‑Wildcard Slut (Feature)</label>
+                    <input type="file" id="file-SuperWildcardSlut" accept="image/*">
+                    <img id="preview-SuperWildcardSlut" alt="preview" />
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <span id="upload-status" class="muted" style="margin-right:auto;">Customize your art</span>
+                <button id="close-customize" class="primary">Close</button>
+                <button id="reset-custom-art" class="linkish">Reset</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Place these inside the <body> or appropriate section -->
     <audio id="audio-dino-start" src="audio/dino_start.mp3" preload="auto"></audio>
     <audio id="audio-dino-reel1" src="audio/dino_reel1.mp3" preload="auto"></audio>
@@ -18,32 +71,307 @@
     <audio id="audio-jackpot_sound" src="audio/jackpot_sound.mp3" preload="auto"></audio>
 
     <div id="slot-machine">
-        <h1>Slut·Machine</h1>
-        <h6><a href="https://github.com/spiritorient/SLUT-MACHINE-pro" target="_blank">openSource·GitHub</a></h6>
-        <h6><a href="https://t.me/devkozmos">·contact·</a></h6>
-        <h6><a href="https://www.youtube.com/@oldbrickfactory/live" target="_blank">dev•Live</a></h6>
-        <h6>|No Official X OR Telegram Group/Channel|</h6>
+        <div class="topbar">
+            <div class="title-wrap">
+                <h1>Slot Machine</h1>
+                <div class="tagline">3‑reel single‑row • Sleek edition</div>
+                <div class="header-accent"></div>
+            </div>
+            <div class="topbar-actions">
+                <button id="open-rules" class="secondary">Game Rules</button>
+                <button id="open-customize" class="secondary">Customize Art</button>
+            </div>
+        </div>
+
+    <!-- Game Rules Modal -->
+    <div id="rules-modal" class="modal-overlay" aria-hidden="true" style="display:none;">
+        <div class="modal">
+            <button class="modal-close" id="close-rules-x" aria-label="Close">×</button>
+            <h2>Game Rules</h2>
+            <p class="muted">The complete manual covering mechanics, payouts, penalties, features, order of operations, and winning strategies.</p>
+
+            <div class="rules-content">
+                <div class="rules-grid">
+                    <main class="rule-prose">
+                        <section class="rule-section" id="overview">
+                            <h3>Overview & Objective</h3>
+                            <p>
+                                This is a 3‑reel, single‑row slot. Each spin reveals one symbol per reel. Your objective is to
+                                grow your score by hitting Jackpots, leveraging Respins on pairs, and capitalizing on the
+                                Super‑Wildcard Slut feature when it appears.
+                            </p>
+                            <div class="callout info"><strong>Tip</strong>: Customize your symbol art any time via <em>Customize Art</em>. Visuals have no impact on RNG, payouts, or rules.</div>
+                        </section>
+
+                        <section class="rule-section" id="layout-controls">
+                            <h3>Layout & Controls</h3>
+                            <ul>
+                                <li><strong>Reels</strong>: 3 reels × 1 row; one symbol per reel.</li>
+                                <li><strong>Starting score</strong>: 300 points on game start.</li>
+                                <li><strong>Spin</strong>: Costs 21 points.</li>
+                                <li><strong>Respin</strong>: Costs 34 points; up to 3 per round; enabled only after a <em>Partial Win</em>.</li>
+                                <li><strong>Recharge</strong>: When score &lt; 50, adds +300 points (no cost).</li>
+                            </ul>
+                        </section>
+
+                        <section class="rule-section" id="symbols">
+                            <h3>Symbol Set</h3>
+                            <ul>
+                                <li><strong>Value symbols</strong>: 5 regular symbols; each is equally likely on base spins.</li>
+                                <li><strong>Honey Slut (Penalty)</strong>: Appears on base spins with equal probability to other symbols. Each Honey Slut showing on the base spin applies a −3 point penalty.</li>
+                                <li><strong>Super‑Wildcard Slut</strong>: Special symbol used only during its feature. It does not appear during base spins or respins.</li>
+                            </ul>
+                        </section>
+
+                        <section class="rule-section" id="paytable">
+                            <h3>Paytable & Scoring</h3>
+                            <div class="paytable" role="table" aria-label="Paytable">
+                                <div class="paytable-row paytable-header" role="row">
+                                    <div role="columnheader">Outcome</div>
+                                    <div role="columnheader">Payout/Cost</div>
+                                    <div role="columnheader">Notes</div>
+                                </div>
+                                <div class="paytable-row" role="row">
+                                    <div role="cell">Jackpot (3 of a kind)</div>
+                                    <div role="cell"><span class="chip chip-payout">+144</span></div>
+                                    <div role="cell">Paid for any triple except 3× Honey Slut (see precedence).</div>
+                                </div>
+                                <div class="paytable-row" role="row">
+                                    <div role="cell">Partial Win (any pair)</div>
+                                    <div role="cell"><span class="chip chip-payout">+13</span></div>
+                                    <div role="cell">Unlocks up to 3 Respins; only the odd reel is re‑spun.</div>
+                                </div>
+                                <div class="paytable-row" role="row">
+                                    <div role="cell">Spin</div>
+                                    <div role="cell"><span class="chip chip-cost">−21</span></div>
+                                    <div role="cell">Paid once per base spin.</div>
+                                </div>
+                                <div class="paytable-row" role="row">
+                                    <div role="cell">Respin</div>
+                                    <div role="cell"><span class="chip chip-cost">−34</span></div>
+                                    <div role="cell">Maximum 3 per round. Only available after a Partial Win.</div>
+                                </div>
+                                <div class="paytable-row" role="row">
+                                    <div role="cell">Honey Slut penalty (per symbol)</div>
+                                    <div role="cell"><span class="chip chip-risk">−3</span></div>
+                                    <div role="cell">Applied only on the base spin; respins do not add new penalties.</div>
+                                </div>
+                                <div class="paytable-row" role="row">
+                                    <div role="cell">Super‑Wildcard Slut reaches reel 3</div>
+                                    <div role="cell"><span class="chip chip-feature">+1000</span></div>
+                                    <div role="cell">Feature payout; see feature rules below.</div>
+                                </div>
+                            </div>
+                            <div class="callout tip"><strong>Precedence</strong>: If 3× Honey Slut land, the Super‑Wildcard Slut feature triggers instead of paying the +144 Jackpot.</div>
+                        </section>
+
+                        <section class="rule-section" id="respins">
+                            <h3>Respins</h3>
+                            <ul>
+                                <li>Enabled after a Partial Win (a pair is present).</li>
+                                <li>Only the odd reel (the one not in the pair) is re‑spun to maximize jackpot odds.</li>
+                                <li>Each respin costs 34 points; up to 3 respins in the same round.</li>
+                                <li>Jackpot immediately ends the round and awards +144 points.</li>
+                                <li>If all 3 respins are used without a Jackpot, the Super‑Wildcard Slut feature may start with a 33.33% chance.</li>
+                            </ul>
+                            <div class="stat-grid">
+                                <div>
+                                    <div class="stat-label">Jackpot per respin (with a pair)</div>
+                                    <div class="stat-value">1/6 ≈ 16.67%</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label">Max respins per round</div>
+                                    <div class="stat-value">3</div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="rule-section" id="super-wildcard">
+                            <h3>Super‑Wildcard Slut Feature</h3>
+                            <ul>
+                                <li><strong>How it triggers</strong>
+                                    <ul>
+                                        <li><em>Guaranteed</em>: 3× Honey Slut on the base spin triggers instantly.</li>
+                                        <li><em>Non‑guaranteed</em>: After using all 3 respins without a Jackpot, 33.33% chance to start.</li>
+                                    </ul>
+                                </li>
+                                <li><strong>How it expands</strong>: The Slut attempts to expand from reel 1 → 2 → 3.
+                                    <ul>
+                                        <li>On a guaranteed trigger, the first jump to reel 2 always succeeds; reaching reel 3 then has a 33.33% chance.</li>
+                                        <li>On a non‑guaranteed trigger, each step (start, to 2, to 3) has a 33.33% chance.</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Payout</strong>: If it reaches reel 3, you win <span class="chip chip-feature">+1000</span>; otherwise the feature ends with no extra payout.</li>
+                            </ul>
+                            <div class="stat-grid">
+                                <div>
+                                    <div class="stat-label">Reach reel 3 (guaranteed trigger)</div>
+                                    <div class="stat-value">33.33% (EV ≈ +333.33)</div>
+                                </div>
+                                <div>
+                                    <div class="stat-label">Reach reel 3 (non‑guaranteed trigger)</div>
+                                    <div class="stat-value">1/27 ≈ 3.70% (EV ≈ +37.04)</div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="rule-section" id="order-of-ops">
+                            <h3>Order of Operations (per round)</h3>
+                            <ol>
+                                <li>Pay <span class="chip chip-cost">−21</span> for the base spin.</li>
+                                <li>Reveal 3 symbols (with equal probability among the 6 base symbols).</li>
+                                <li>Apply Honey Slut penalties: <span class="chip chip-risk">−3</span> per Honey Slut shown on the base spin.</li>
+                                <li>Resolve best outcome:
+                                    <ul>
+                                        <li>3× Honey Slut → trigger Super‑Wildcard Slut (no +144 Jackpot).</li>
+                                        <li>Any other 3 of a kind → award <span class="chip chip-payout">+144</span>, round ends.</li>
+                                        <li>Exactly a pair → award <span class="chip chip-payout">+13</span>, enable Respins.</li>
+                                        <li>All distinct → no win; round ends.</li>
+                                    </ul>
+                                </li>
+                                <li>During Respins: only the odd reel is re‑spun; on Jackpot the round ends; after 3 respins without a Jackpot, attempt non‑guaranteed Super‑Wildcard Slut.</li>
+                            </ol>
+                        </section>
+
+                        <section class="rule-section" id="strategy">
+                            <h3>Strategy Guide</h3>
+                            <ul>
+                                <li><strong>Bankroll safety</strong>: Penalties average about −1.5 per base spin (Honey Slut shows ~0.5 times on average). Avoid burning all respins when your score is low; recharge early (score < 50).</li>
+                                <li><strong>Targeted respins</strong>: With a non‑Honey pair, each respin has 1/6 to upgrade to a +144 Jackpot (EV ≈ +24 vs. 34 cost). Use sparingly unless you want variance or are close to a goal.</li>
+                                <li><strong>Honey pair aggression</strong>: A Honey Slut pair has extra upside. A single respin can make it triple Honey Slut → guaranteed feature → 33.33% to hit +1000.</li>
+                                <li><strong>Don’t chase the feature</strong>: Intentionally using all 3 respins just to try the non‑guaranteed feature is usually −EV (≈3.7% success).</li>
+                                <li><strong>Session pacing</strong>: Take breaks after feature attempts; volatility can cluster.</li>
+                            </ul>
+                        </section>
+
+                        <section class="rule-section" id="examples">
+                            <h3>Worked Examples</h3>
+                            <ul>
+                                <li><strong>Example A</strong>: You spin [A, A, B]. You gain +13 (Partial Win) and can respin reel 3 for 34 points. That respin has 1/6 to land A and pay +144.</li>
+                                <li><strong>Example B</strong>: You spin [Honey, Honey, C]. Penalty −6 applies. You gain +13 (pair) and can respin the odd reel. If it lands Honey, feature starts guaranteed.</li>
+                                <li><strong>Example C</strong>: You spin [Honey, Honey, Honey]. Penalty −9 applies; feature starts guaranteed with the first jump free. You have 33.33% to reach reel 3 for +1000.</li>
+                            </ul>
+                        </section>
+
+                        <section class="rule-section" id="faq">
+                            <h3>FAQ</h3>
+                            <ul>
+                                <li><strong>Do respins add extra Honey penalties?</strong> No. Penalties apply only on the base spin.</li>
+                                <li><strong>Does triple Honey pay +144?</strong> No. It triggers the feature instead of the Jackpot payout.</li>
+                                <li><strong>Is the RNG fair?</strong> Yes. Each base symbol has independent 1/6 probability per reel.</li>
+                                <li><strong>Does custom art change odds?</strong> Never. Customization is purely visual and stored locally in your browser.</li>
+                            </ul>
+                        </section>
+
+                        <section class="rule-section" id="glossary">
+                            <h3>Glossary</h3>
+                            <ul>
+                                <li><strong>Base spin</strong>: The initial spin of a round (costs 21 points).</li>
+                                <li><strong>Partial Win</strong>: Exactly one pair among the three symbols; awards +13 and unlocks Respins.</li>
+                                <li><strong>Respin</strong>: A paid re‑roll of only the odd reel after a Partial Win; up to 3 per round.</li>
+                                <li><strong>Super‑Wildcard Slut</strong>: A feature that can expand across reels and pay +1000 if it reaches reel 3.</li>
+                            </ul>
+                        </section>
+                    </main>
+
+                    <aside class="rule-aside">
+                        <div class="rule-card">
+                            <h4>At a glance</h4>
+                            <div class="chip-row">
+                                <span class="chip chip-cost">Spin −21</span>
+                                <span class="chip chip-cost">Respin −34</span>
+                                <span class="chip chip-payout">Jackpot +144</span>
+                                <span class="chip chip-feature">Feature +1000</span>
+                            </div>
+                        </div>
+
+                        <div class="rule-card">
+                            <h4>Key Probabilities</h4>
+                            <ul class="compact">
+                                <li><span class="chip chip-prob">Symbol on a reel: 1/6</span></li>
+                                <li><span class="chip chip-prob">Jackpot pays: 5/216 ≈ 2.31%</span></li>
+                                <li><span class="chip chip-prob">Exactly one pair: 90/216 ≈ 41.67%</span></li>
+                                <li><span class="chip chip-prob">≥1 Honey: 91/216 ≈ 42.13%</span></li>
+                                <li><span class="chip chip-prob">Triple Honey: 1/216 ≈ 0.46%</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="rule-card">
+                            <h4>Controls</h4>
+                            <ul class="compact">
+                                <li>Spin: start a new round</li>
+                                <li>Respin: re‑roll odd reel after a pair</li>
+                                <li>Recharge: appears at score &lt; 50</li>
+                                <li>Customize Art: upload per‑symbol images</li>
+                                <li>Close (Esc or X): dismiss this panel</li>
+                            </ul>
+                        </div>
+                    </aside>
+                </div>
+
+                <div class="modal-actions">
+                    <span class="muted" style="margin-right:auto;">Good luck and have fun!</span>
+                    <button id="close-rules" class="primary close-cta">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chip Info Modal -->
+    <div id="chip-info-modal" class="modal-overlay" aria-hidden="true" style="display:none;">
+        <div class="modal">
+            <button class="modal-close" id="close-chipinfo-x" aria-label="Close">×</button>
+            <h2 id="chip-info-title">Stat</h2>
+            <div class="chip-detail-current" id="chip-info-current">Current: —</div>
+            <p id="chip-info-desc">Tap any HUD chip to learn what it tracks and how it changes during play.</p>
+            <div class="modal-actions">
+                <button id="close-chipinfo" class="primary">Close</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- Heads-up display -->
+        <div class="hud">
+            <div class="hud-chip" id="score" aria-live="polite">Score: 0</div>
+            <div class="hud-chip" id="recharge-counter">Recharges: 0</div>
+            <span class="hud-chip" id="rounds-counter">Rounds: 0</span>
+            <span class="hud-chip" id="jackpots-counter">Jackpots: 0</span>
+            <span class="hud-chip" id="pairs-counter">Pairs: 0</span>
+            <span class="hud-chip" id="nowins-counter">No‑wins: 0</span>
+            <span class="hud-chip" id="respins-session-counter">Respins (session): 0</span>
+            <span class="hud-chip" id="honey-hits-counter">Honey hits: 0</span>
+            <span class="hud-chip" id="honey-penalty-counter">Honey penalty: 0</span>
+            <span class="hud-chip" id="triple-honey-counter">Triple Honey: 0</span>
+            <span class="hud-chip" id="feature-tries-g-counter">Feature tries (G): 0</span>
+            <span class="hud-chip" id="feature-tries-ng-counter">Feature tries (NG): 0</span>
+            <span class="hud-chip" id="feature-expand2-counter">Expand→2: 0</span>
+            <span class="hud-chip" id="feature-wins-counter">Feature wins: 0</span>
+            <span class="hud-chip" id="pair-streak-counter">Pair streak: 0</span>
+            <span class="hud-chip" id="net-session-counter">Net session: 0</span>
+            <span class="hud-chip" id="high-score-counter">High score: 0</span>
+        </div>
+
+        <!-- Status Message -->
+        <div id="message" class="message" aria-live="polite"></div>
 
         <!-- Reel Container -->
         <div class="reels">
             <div class="reel" id="reel1"></div>
-            <div class="reel" id="reel2">°</div>
-            <div class="reel" id="reel3">°</div>
+            <div class="reel" id="reel2"></div>
+            <div class="reel" id="reel3"></div>
         </div>
 
-       <!-- Buttons Section -->
-        <button id="spin-button">Spin (Cost: 21 Points)</button> <!-- Spin Button with Cost -->
-        <button id="respin-button" style="display: none;">Respin (Cost: 34 Points)</button> <!-- Respin Button -->
-        <button id="recharge-button" style="display: none;">Recharge (+300 Points)</button> <!-- Recharge Button -->
+        <!-- Controls -->
+        <div class="controls">
+            <button id="spin-button" class="btn btn-primary">Spin (Cost: 21 Points)</button>
+            <button id="respin-button" class="btn btn-warn" style="display: none;">Respin (Cost: 34 Points)</button>
+            <button id="recharge-button" class="btn btn-success" style="display: none;">Recharge (+300 Points)</button>
+        </div>
 
-        <!-- Message Section -->
-        <div id="message"></div>
-
-        <!-- Score Display -->
-        <div id="turn-score" style="opacity: 0; transition: opacity 0.5s ease-out; font-size: 18px; text-align: center;"></div>
-        <div id="score">Score: 0</div>
-        <div id="recharge-counter">Recharges: 0</div>
+        <!-- Turn Score (ephemeral) -->
+        <div id="turn-score" class="turn-score" aria-hidden="true"></div>
     </div>
+
 
     <script src="script.js"></script>
 </body>

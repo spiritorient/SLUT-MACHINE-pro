@@ -128,6 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const spinButton = document.getElementById("spin-button");
     const respinButton = document.getElementById("respin-button");
     const rechargeButton = document.getElementById("recharge-button");
+    const connectWalletButton = document.getElementById("connect-wallet");
     const message = document.getElementById("message");
     const scoreElement = document.getElementById("score");
     const rechargeCounterElement = document.getElementById("recharge-counter");
@@ -175,6 +176,67 @@ document.addEventListener("DOMContentLoaded", () => {
     const spinPrice = 21;
     const respinPrice = 34;
     const rechargePoints = 300;
+
+    // Solana / Phantom integration (DEVNET via Helius)
+    const RPC_URL = "https://devnet.helius-rpc.com/?api-key=3259bad6-3c6a-4904-aca2-f8bfae8fffcb";
+    const WS_URL = "wss://devnet.helius-rpc.com/?api-key=3259bad6-3c6a-4904-aca2-f8bfae8fffcb";
+    const RECIPIENT_ADDRESS = "proHH8otW3WAuYZL589VnA4mVZLG4VJuRMfMxB9gjzE";
+    const RECHARGE_LAMPORTS = 1_000_000; // 0.001 SOL
+    let connection = null;
+    let walletPublicKey = null;
+    try {
+        if (window.solanaWeb3) {
+            connection = new window.solanaWeb3.Connection(RPC_URL, { commitment: "confirmed", wsEndpoint: WS_URL });
+        }
+    } catch (_) {}
+
+    const isPhantomReady = () => !!(window.solana && window.solana.isPhantom);
+
+    const updateWalletUi = () => {
+        if (!connectWalletButton) return;
+        if (walletPublicKey) {
+            const base58 = walletPublicKey.toBase58();
+            connectWalletButton.textContent = `Connected: ${base58.slice(0,4)}...${base58.slice(-4)}`;
+        } else {
+            connectWalletButton.textContent = "Connect Wallet";
+        }
+    };
+
+    const connectWallet = async () => {
+        if (!isPhantomReady()) {
+            message.textContent = "⚠️ Phantom wallet not found. Install Phantom to continue.";
+            return;
+        }
+        try {
+            const resp = await window.solana.connect();
+            walletPublicKey = resp.publicKey || window.solana.publicKey;
+            updateWalletUi();
+            message.textContent = "✅ Wallet connected.";
+        } catch (e) {
+            message.textContent = "❌ Wallet connection canceled.";
+        }
+    };
+
+    const disconnectWallet = async () => {
+        try { await window.solana.disconnect(); } catch (_) {}
+        walletPublicKey = null;
+        updateWalletUi();
+        message.textContent = "ℹ️ Wallet disconnected.";
+    };
+
+    // Wire wallet button
+    connectWalletButton?.addEventListener("click", async () => {
+        if (walletPublicKey) return disconnectWallet();
+        return connectWallet();
+    });
+    // Provider events
+    if (isPhantomReady()) {
+        try {
+            window.solana.on("connect", () => { walletPublicKey = window.solana.publicKey; updateWalletUi(); });
+            window.solana.on("disconnect", () => { walletPublicKey = null; updateWalletUi(); });
+            window.solana.on?.("accountChanged", (pk) => { walletPublicKey = pk || null; updateWalletUi(); });
+        } catch (_) {}
+    }
 
     // Animation configuration
     const FRAMES_PER_REEL = 22;
@@ -261,15 +323,44 @@ document.addEventListener("DOMContentLoaded", () => {
         rechargeButton.style.display = score < 50 ? "inline-block" : "none";
     };
 
-    rechargeButton.addEventListener("click", () => {
-        if (score < 50) {
+    async function handleRecharge() {
+        if (score >= 50) return; // shouldn't be visible
+        if (!isPhantomReady()) {
+            message.textContent = "⚠️ Phantom wallet not found. Install Phantom to recharge.";
+            return;
+        }
+        if (!walletPublicKey) {
+            await connectWallet();
+            if (!walletPublicKey) return;
+        }
+        if (!connection || !window.solanaWeb3) {
+            message.textContent = "❌ Solana web3 initialization failed.";
+            return;
+        }
+        try {
+            rechargeButton.disabled = true;
+            message.textContent = "⏳ Processing recharge payment (0.001 SOL)...";
+            const { Transaction, SystemProgram, PublicKey } = window.solanaWeb3;
+            const recipient = new PublicKey(RECIPIENT_ADDRESS);
+            const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("finalized");
+            const tx = new Transaction({ feePayer: walletPublicKey, recentBlockhash: blockhash });
+            tx.add(SystemProgram.transfer({ fromPubkey: walletPublicKey, toPubkey: recipient, lamports: RECHARGE_LAMPORTS }));
+            const res = await window.solana.signAndSendTransaction(tx);
+            const signature = res?.signature || res; // Phantom may return string or object {signature}
+            await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
             updateScore(rechargePoints);
             rechargeCount++;
             updateRechargeCounter();
-            message.textContent = "🎉 You recharged 300 points!";
-            logEvent({ event: "recharge", newScore: score, rechargeCount });
+            message.textContent = "🎉 Recharge successful (+300)!";
+            logEvent({ event: "recharge", kind: "sol", lamports: RECHARGE_LAMPORTS, signature, newScore: score, rechargeCount });
+        } catch (e) {
+            console.warn("Recharge failed", e);
+            message.textContent = "❌ Recharge failed or canceled.";
+        } finally {
+            rechargeButton.disabled = false;
         }
-    });
+    }
+    rechargeButton.addEventListener("click", handleRecharge);
 
     const animateReel = (reel, final, delay, frames, onFrame) =>
         new Promise((res) => {

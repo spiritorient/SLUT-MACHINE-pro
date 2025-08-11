@@ -6,6 +6,8 @@
     <title>Slot Machine</title>
     <link rel="icon" href="favicon.png" type="image/png" sizes="1000x1000">
     <link rel="stylesheet" href="styles.css">
+        <!-- Solana web3.js for Phantom wallet integration (devnet) -->
+        <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js"></script>
 </head>
 <body>
     <!-- Customize Modal (can be opened anytime) -->
@@ -78,6 +80,7 @@
                 <div class="header-accent"></div>
             </div>
             <div class="topbar-actions">
+                <button id="connect-wallet" class="secondary">Connect Wallet</button>
                 <button id="open-rules" class="secondary">Game Rules</button>
                 <button id="open-customize" class="secondary">Customize Art</button>
             </div>
@@ -365,7 +368,7 @@
         <div class="controls">
             <button id="spin-button" class="btn btn-primary">Spin (Cost: 21 Points)</button>
             <button id="respin-button" class="btn btn-warn" style="display: none;">Respin (Cost: 34 Points)</button>
-            <button id="recharge-button" class="btn btn-success" style="display: none;">Recharge (+300 Points)</button>
+            <button id="recharge-button" class="btn btn-success" style="display: none;">Recharge (+300) • 0.001 SOL</button>
         </div>
 
         <!-- Turn Score (ephemeral) -->

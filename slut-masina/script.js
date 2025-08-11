@@ -268,7 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Solana / Phantom integration (DEVNET via Helius)
     const RPC_URL = "https://devnet.helius-rpc.com/?api-key=3259bad6-3c6a-4904-aca2-f8bfae8fffcb";
     // WebSocket not required for current flow; HTTP polling is sufficient
-    const RECIPIENT_ADDRESS = "proHH8otW3WAuYZL589VnA4mVZLG4VJuRMfMxB9gjzE";
+    const RECIPIENT_ADDRESS = "64proZNUFDDqPyQSiGw3pkgNtFfj9RndtM7ibw6UJrcQ";
     const RECHARGE_LAMPORTS = 1_000_000; // 0.001 SOL
     let connection = null;
     let walletPublicKey = null;

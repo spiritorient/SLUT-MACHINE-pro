@@ -1,3 +1,91 @@
+// Ensure Node-like globals needed by @solana/web3.js exist in the browser
+(() => {
+    try {
+        const g = typeof globalThis !== "undefined" ? globalThis : window;
+        if (!g.global) g.global = g;
+        if (!g.process) g.process = { env: {} };
+
+        // Prefer the Buffer from the buffer polyfill if available
+        if (!g.Buffer || typeof g.Buffer.from !== "function" || typeof g.Buffer.alloc !== "function") {
+            if (g.buffer && g.buffer.Buffer) {
+                g.Buffer = g.buffer.Buffer;
+            }
+        }
+
+        // Minimal Buffer shim if still missing
+        if (!g.Buffer || typeof g.Buffer.from !== "function" || typeof g.Buffer.alloc !== "function") {
+            const textEncoder = new (g.TextEncoder || function() {})();
+            const textDecoder = g.TextDecoder ? new g.TextDecoder() : null;
+
+            function from(input, encOrOffset, length) {
+                if (input == null) return new Uint8Array(0);
+                if (typeof input === "string") {
+                    if (textEncoder && typeof textEncoder.encode === "function") {
+                        return textEncoder.encode(input);
+                    }
+                    const arr = unescape(encodeURIComponent(input)).split("").map(c => c.charCodeAt(0));
+                    return new Uint8Array(arr);
+                }
+                if (Array.isArray(input)) return new Uint8Array(input);
+                if (input instanceof Uint8Array) return new Uint8Array(input);
+                if (input instanceof ArrayBuffer) return new Uint8Array(input, encOrOffset || 0, length || undefined);
+                // BigInt to LE bytes (common in web3 encode paths)
+                if (typeof input === "bigint") {
+                    // default to 8 bytes
+                    let hex = input.toString(16);
+                    if (hex.length % 2) hex = "0" + hex;
+                    const bytes = hex.match(/.{1,2}/g).map(h => parseInt(h, 16)).reverse();
+                    return new Uint8Array(bytes);
+                }
+                if (typeof input === "number") return new Uint8Array([input & 0xff]);
+                return new Uint8Array(0);
+            }
+
+            function alloc(size, fill, encoding) {
+                const a = new Uint8Array(size);
+                if (fill !== undefined) {
+                    if (typeof fill === "number") {
+                        a.fill(fill);
+                    } else if (typeof fill === "string") {
+                        a.set(from(fill, encoding));
+                    } else if (fill instanceof Uint8Array) {
+                        a.set(fill.subarray(0, size));
+                    }
+                }
+                return a;
+            }
+
+            function concat(list, totalLength) {
+                if (!Array.isArray(list)) return new Uint8Array(0);
+                const len = totalLength || list.reduce((n, x) => n + (x ? x.length || x.byteLength || 0 : 0), 0);
+                const out = new Uint8Array(len);
+                let offset = 0;
+                for (const item of list) {
+                    if (!item) continue;
+                    const u8 = item instanceof Uint8Array ? item : from(item);
+                    out.set(u8, offset);
+                    offset += u8.length;
+                }
+                return out;
+            }
+
+            class BufferShim extends Uint8Array {}
+            BufferShim.from = from;
+            BufferShim.alloc = alloc;
+            BufferShim.concat = concat;
+            BufferShim.isBuffer = (obj) => obj instanceof Uint8Array;
+            g.Buffer = BufferShim;
+        }
+
+        // Ensure a real global var binding exists for Buffer so libraries resolve it
+        try {
+            const s = document.createElement("script");
+            s.text = "var Buffer = globalThis.Buffer;";
+            document.head.appendChild(s);
+        } catch (_) {}
+    } catch (_) {}
+})();
+
 document.addEventListener("DOMContentLoaded", () => {
     // Original symbol set
     const SYMBOLS = [
@@ -179,18 +267,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Solana / Phantom integration (DEVNET via Helius)
     const RPC_URL = "https://devnet.helius-rpc.com/?api-key=3259bad6-3c6a-4904-aca2-f8bfae8fffcb";
-    const WS_URL = "wss://devnet.helius-rpc.com/?api-key=3259bad6-3c6a-4904-aca2-f8bfae8fffcb";
+    // WebSocket not required for current flow; HTTP polling is sufficient
     const RECIPIENT_ADDRESS = "proHH8otW3WAuYZL589VnA4mVZLG4VJuRMfMxB9gjzE";
     const RECHARGE_LAMPORTS = 1_000_000; // 0.001 SOL
     let connection = null;
     let walletPublicKey = null;
     try {
         if (window.solanaWeb3) {
-            connection = new window.solanaWeb3.Connection(RPC_URL, { commitment: "confirmed", wsEndpoint: WS_URL });
+            connection = new window.solanaWeb3.Connection(RPC_URL, "confirmed");
         }
     } catch (_) {}
 
-    const isPhantomReady = () => !!(window.solana && window.solana.isPhantom);
+    const isPhantomReady = () => !!(window.solana && (window.solana.isPhantom || window.solana.isConnected));
 
     const updateWalletUi = () => {
         if (!connectWalletButton) return;
@@ -323,6 +411,49 @@ document.addEventListener("DOMContentLoaded", () => {
         rechargeButton.style.display = score < 50 ? "inline-block" : "none";
     };
 
+    // Build SystemProgram.transfer instruction without relying on Buffer-heavy layout code
+    function u32ToLeBytes(value) {
+        const v = value >>> 0;
+        return new Uint8Array([
+            v & 0xff,
+            (v >>> 8) & 0xff,
+            (v >>> 16) & 0xff,
+            (v >>> 24) & 0xff,
+        ]);
+    }
+
+    function u64ToLeBytes(value) {
+        let v = BigInt(value);
+        const bytes = new Uint8Array(8);
+        for (let i = 0; i < 8; i++) {
+            bytes[i] = Number(v & 0xffn);
+            v >>= 8n;
+        }
+        return bytes;
+    }
+
+    function buildSystemTransferData(lamports) {
+        const INSTRUCTION_INDEX_TRANSFER = 2; // SystemProgram.Transfer
+        const idx = u32ToLeBytes(INSTRUCTION_INDEX_TRANSFER);
+        const amt = u64ToLeBytes(lamports);
+        const out = new Uint8Array(4 + 8);
+        out.set(idx, 0);
+        out.set(amt, 4);
+        return out;
+    }
+
+    function createTransferInstruction(fromPubkey, toPubkey, lamports) {
+        const { TransactionInstruction, SystemProgram } = window.solanaWeb3;
+        return new TransactionInstruction({
+            keys: [
+                { pubkey: fromPubkey, isSigner: true, isWritable: true },
+                { pubkey: toPubkey, isSigner: false, isWritable: true },
+            ],
+            programId: SystemProgram.programId,
+            data: buildSystemTransferData(lamports),
+        });
+    }
+
     async function handleRecharge() {
         if (score >= 50) return; // shouldn't be visible
         if (!isPhantomReady()) {
@@ -340,13 +471,16 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             rechargeButton.disabled = true;
             message.textContent = "⏳ Processing recharge payment (0.001 SOL)...";
-            const { Transaction, SystemProgram, PublicKey } = window.solanaWeb3;
+            const { Transaction, PublicKey } = window.solanaWeb3;
             const recipient = new PublicKey(RECIPIENT_ADDRESS);
             const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("finalized");
             const tx = new Transaction({ feePayer: walletPublicKey, recentBlockhash: blockhash });
-            tx.add(SystemProgram.transfer({ fromPubkey: walletPublicKey, toPubkey: recipient, lamports: RECHARGE_LAMPORTS }));
-            const res = await window.solana.signAndSendTransaction(tx);
-            const signature = res?.signature || res; // Phantom may return string or object {signature}
+            tx.add(createTransferInstruction(walletPublicKey, recipient, RECHARGE_LAMPORTS));
+            // Let Phantom populate recentBlockhash/fee payer if required
+            tx.feePayer = walletPublicKey;
+            // Phantom expects a serialized message for signAndSendTransaction in some versions
+            const signed = await window.solana.signAndSendTransaction(tx);
+            const signature = signed?.signature || signed; // supports string or { signature }
             await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
             updateScore(rechargePoints);
             rechargeCount++;

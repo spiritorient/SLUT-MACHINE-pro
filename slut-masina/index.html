@@ -5,7 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Slot Machine</title>
     <link rel="icon" href="favicon.png" type="image/png" sizes="1000x1000">
-    <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="styles.css">
+        <!-- Polyfills for browser compatibility with web3.js -->
+        <script>
+            // Ensure Node-like globals exist as early as possible
+            (function () {
+                var g = typeof globalThis !== 'undefined' ? globalThis : window;
+                g.global = g;
+                if (!g.process) g.process = { env: {} };
+            })();
+        </script>
+        <script src="https://unpkg.com/buffer@6.0.3/dist/buffer.min.js"></script>
+        <script>
+            // Ensure Buffer is globally available regardless of export style and create a real global binding
+            (function () {
+                var g = typeof globalThis !== 'undefined' ? globalThis : window;
+                try {
+                    if (!g.Buffer && g.buffer && g.buffer.Buffer) {
+                        g.Buffer = g.buffer.Buffer;
+                    }
+                } catch (_) {}
+            })();
+            // Create a true global var binding so libraries that capture `Buffer` at load-time see it
+            try { var Buffer = globalThis.Buffer; } catch (_) {}
+        </script>
         <!-- Solana web3.js for Phantom wallet integration (devnet) -->
         <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js"></script>
 </head>

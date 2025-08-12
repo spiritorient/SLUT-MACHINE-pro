@@ -433,3 +433,24 @@ body {
 #chip-info-title { color: #e5e7eb; margin: 0 0 8px; }
 .chip-detail-current { color: #cbd5e1; margin-bottom: 8px; font-weight: 700; }
 #chip-info-desc { color: #cbd5e1; line-height: 1.6; font-size: 15px; }
+
+/* Reward overlay for Super‑Wildcard win */
+#reward-overlay {
+    position: fixed;
+    inset: 0;
+    display: none; /* toggled to flex in JS */
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.9);
+    z-index: 2000;
+}
+
+#reward-overlay[aria-hidden="false"] { display: flex; }
+
+#reward-overlay img {
+    max-width: 100vw;
+    max-height: 100vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}

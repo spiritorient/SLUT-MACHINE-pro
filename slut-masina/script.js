@@ -132,11 +132,8 @@ document.addEventListener("DOMContentLoaded", () => {
         symbol5: svgDataUri(`
             <svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>
               <rect width='100%' height='100%' fill='#0f172a'/>
-              <rect x='50' y='80' width='100' height='60' fill='#22c55e' rx='5'/>
-              <circle cx='70' cy='140' r='15' fill='#1f2937'/>
-              <circle cx='130' cy='140' r='15' fill='#1f2937'/>
-              <rect x='80' y='50' width='40' height='30' fill='#3b82f6'/>
-              <text x='50%' y='100%' text-anchor='middle' font-family='Arial' font-size='20' fill='#94a3b8'>Tractor</text>
+              <polygon points='100,30 117,75 165,75 126,105 140,150 100,125 60,150 74,105 35,75 83,75' fill='#22d3ee' stroke='#06b6d4' stroke-width='4'/>
+              <text x='50%' y='54%' text-anchor='middle' font-family='Arial' font-size='72' fill='#ffffff' font-weight='bold'>5</text>
             </svg>
         `),
         HoneySlut: svgDataUri(`
@@ -159,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
               </defs>
               <rect width='100%' height='100%' fill='#0b1220'/>
               <circle cx='100' cy='100' r='64' fill='url(#dinobg)' stroke='#0ea5e9' stroke-width='6'/>
-              <text x='50%' y='54%' text-anchor='middle' font-family='Arial' font-size='18' fill='#0b1220' font-weight='900'>SLUT</text>
+              <text x='50%' y='54%' text-anchor='middle' font-family='Arial' font-size='18' fill='#0b1220' font-weight='900'>THE SLUT</text>
             </svg>
         `),
     };
@@ -211,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Initialize reels with symbol5 as per original game
-    reels.forEach(r => applyBackground(r, "symbol5"));
+    reels.forEach(r => applyBackground(r, "SuperWildcardSlut"));
 
     const spinButton = document.getElementById("spin-button");
     const respinButton = document.getElementById("respin-button");
@@ -710,6 +707,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 message.textContent = "🎉 Super-Wildcard Slut! +1000 pts!";
                 updateScore(1000);
                 logEvent({ event: "slut_win", newScore: score });
+                // Show full-screen reward image
+                try {
+                    const overlay = document.getElementById("reward-overlay");
+                    if (overlay) {
+                        overlay.style.display = "flex";
+                        overlay.setAttribute("aria-hidden", "false");
+                        const hide = () => {
+                            overlay.style.display = "none";
+                            overlay.setAttribute("aria-hidden", "true");
+                            overlay.removeEventListener("click", hide);
+                            document.removeEventListener("keydown", onKey);
+                        };
+                        const onKey = (e) => { if (e.key === "Escape") hide(); };
+                        overlay.addEventListener("click", hide);
+                        document.addEventListener("keydown", onKey);
+                    }
+                } catch (_) {}
                 stats.featureWins += 1;
                 renderHud();
                 return endRound();

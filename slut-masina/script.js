@@ -213,6 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const spinButton = document.getElementById("spin-button");
     const respinButton = document.getElementById("respin-button");
     const rechargeButton = document.getElementById("recharge-button");
+    const enterCodeButton = document.getElementById("enter-code-button");
     const connectWalletButton = document.getElementById("connect-wallet");
     const message = document.getElementById("message");
     const scoreElement = document.getElementById("score");
@@ -405,7 +406,9 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const toggleRechargeButton = () => {
-        rechargeButton.style.display = score < 50 ? "inline-block" : "none";
+        const shouldShow = score < 50;
+        rechargeButton.style.display = shouldShow ? "inline-block" : "none";
+        if (enterCodeButton) enterCodeButton.style.display = shouldShow ? "inline-block" : "none";
     };
 
     // Build SystemProgram.transfer instruction without relying on Buffer-heavy layout code
@@ -492,6 +495,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     rechargeButton.addEventListener("click", handleRecharge);
+
+    // Optional: code-based recharge (dev/cheat)
+    function handleEnterCode() {
+        const code = prompt("Enter code");
+        if (code === "666") {
+            updateScore(rechargePoints);
+            rechargeCount++;
+            updateRechargeCounter();
+            message.textContent = "🎉 Recharge successful (+300)!";
+            logEvent({ event: "recharge", kind: "code", code: "666", newScore: score, rechargeCount });
+        } else if (code != null) {
+            message.textContent = "❌ Invalid code.";
+        }
+    }
+    enterCodeButton?.addEventListener("click", handleEnterCode);
 
     const animateReel = (reel, final, delay, frames, onFrame) =>
         new Promise((res) => {

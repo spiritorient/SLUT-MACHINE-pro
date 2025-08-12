@@ -250,6 +250,8 @@ body {
 .btn-primary { background: linear-gradient(90deg, var(--brand-start), var(--brand-end)); color: #fff; box-shadow: 0 8px 14px rgba(59,130,246,.18); }
 .btn-success { background: linear-gradient(90deg, var(--success-start), var(--success-end)); color: #fff; box-shadow: 0 8px 14px rgba(34,197,94,.18); }
 .btn-warn { background: linear-gradient(90deg, var(--warn-start), var(--warn-end)); color: #fff; box-shadow: 0 8px 14px rgba(249,115,22,.18); }
+/* Subtle button for Enter Code */
+#enter-code-button { background: #e2e8f0; color: #0b1220; border: 1px solid #cbd5e1; }
 
 /* Reel Container */
 .reels { display: flex; justify-content: center; gap: 12px; margin: 10px 0 6px; background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%); border: 1px solid #e5e7eb; border-radius: calc(var(--radius) + 2px); padding: 12px; box-shadow: 0 12px 40px rgba(2,6,23,0.08); }
